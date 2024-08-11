@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: ./mysql/Dockerfile
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: laravel
+      MYSQL_PASSWORD: root
+    networks:
+      - laravel
+
+  project1:
+    build:
+      context: .
+      dockerfile: ./project1/Dockerfile
+    volumes:
+      - ../project1/:/var/www/html/project1
+    networks:
+      - laravel
+  project2:
+    build:
+      context: .
+      dockerfile: ./project2/Dockerfile
+    volumes:
+      - ../project2/:/var/www/html/project2
+    networks:
+      - laravel
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "8080:80"
+      - "8082:81"
+    volumes:
+      - ../project1/:/var/www/html/project1
+      - ../project2/:/var/www/html/project2
+    networks:
+      - laravel
+  phpmyadmin:
+    build:
+      context: .
+      dockerfile: ./phpmyadmin/Dockerfile
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+volumes:
+  mysql_data:
+
+networks:
+  laravel:
+    driver: bridge
